@@ -12,7 +12,7 @@ model User {
   email String @unique
   password String
   name String
-  photo String
+  photo String?
   rooms Room[]  //a single user can create multiple rooms
   chats Chat[]  //a user can have multiple chats
 }
