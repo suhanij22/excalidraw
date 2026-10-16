@@ -13,7 +13,7 @@ export default function Home() {
     <div className=" flex w-screen h-screen justify-center items-center">
      <input value={roomId} onChange={(e)=>{
       setRoomId(e.target.value);
-     }} type="text" placeholder="Room ID" />  
+     }} type="text" placeholder="Room name" />  
      <button onClick={()=>{
       router.push(`/room/${roomId}`);
      }}>Join Room </button>

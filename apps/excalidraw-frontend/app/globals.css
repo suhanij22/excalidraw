@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #fffefa;
+  --color-paper-warm: #f8f5ed;
+  --color-paper-cool: #f5f7fb;
+
+  --color-ink: #1e2231;
+  --color-ink-light: #454b5e;
+  --color-ink-soft: #6b7280;
+
+  --color-accent-blue: #3b82f6;
+  --color-accent-orange: #f97316;
+  --color-accent-green: #10b981;
+  --color-accent-pink: #ec4899;
+  --color-accent-yellow: #facc15;
+}
+:root {
+  --sketch-pen: #1e2231;
+}
+
+body {
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+@layer base {
+  .font-hand {
+    font-family: 'Caveat', cursive;
+  }
+  .font-hand-alt {
+    font-family: 'Patrick Hand', cursive;
+  }
+}
+
+@layer utilities {
+  .sketch-border {
+    border-style: solid;
+    border-width: 1.5px;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .bg-grid {
+    background-image:
+      linear-gradient(to right, rgba(30, 34, 49, 0.04) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(30, 34, 49, 0.04) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+
+  .bg-dots {
+    background-image: radial-gradient(rgba(30, 34, 49, 0.08) 1px, transparent 1px);
+    background-size: 18px 18px;
+  }
+}
+
+@keyframes float-y {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes draw-line {
+  from { stroke-dashoffset: 1000; }
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pop-in {
+  0% { opacity: 0; transform: scale(0.6); }
+  60% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+.animate-float-y {
+  animation: float-y 4s ease-in-out infinite;
+}
+.animate-wiggle {
+  animation: wiggle 3s ease-in-out infinite;
+}
+.animate-draw {
+  stroke-dasharray: 1000;
+  animation: draw-line 2.5s ease-in-out forwards;
+}
+.animate-fade-up {
+  animation: fade-up 0.8s ease-out forwards;
+}
+.animate-pop-in {
+  animation: pop-in 0.6s ease-out forwards;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-700 { animation-delay: 0.7s; }
+
+.opacity-init {
+  opacity: 0;
+}
