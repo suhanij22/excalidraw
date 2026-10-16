@@ -37,38 +37,46 @@ app.post("/signup",async (req,res)=>{
     }
 });
 
-app.post("/signin",async(req,res)=>{
-    const parsedData=SigninSchema.safeParse(req.body);
-    if(!parsedData.success)
-    {
-        res.json({
-            message:"incorrect inputs"
-        })
-        return ;
+
+app.post("/signin", async (req, res) => {
+    const parsedData = SigninSchema.safeParse(req.body);
+
+    if (!parsedData.success) {
+        return res.status(400).json({
+            message: "incorrect inputs"
+        });
     }
-    const user= await prismaClient.user.findFirst({
-        where:{
-            email:parsedData.data?.username,
-            password:parsedData.data?.password
+
+    try {
+        const user = await prismaClient.user.findFirst({
+            where: {
+                email: parsedData.data.username,
+                password: parsedData.data.password
+            }
+        });
+
+        if (!user) {
+            return res.status(403).json({
+                message: "not authorized"
+            });
         }
-    })
-    if(!user)
-    {
-        res.status(403).json({
-            message:"not authorized"
-        })
-        return ;
+
+        const token = jwt.sign(
+            { userId: user.id },
+            JWT_SECRET
+        );
+
+        return res.json({ token });
+
+    } catch (err) {
+        console.error("SIGNIN ERROR:", err);
+
+        return res.status(500).json({
+            message: "Signin failed"
+        });
     }
-
-    
-    const token= jwt.sign({
-        userId:user?.id
-    },JWT_SECRET);
-
-    res.json({
-        token
-    })
 });
+
 
 app.post("/room",middleware,async(req,res)=>{
     const parsedData=CreateRoomSchema.safeParse(req.body);
@@ -101,8 +109,36 @@ app.post("/room",middleware,async(req,res)=>{
     }
 });
 
+
+
+app.get("/room/:slug", async (req, res) => {
+  const slug = req.params.slug;
+
+  try {
+    const room = await prismaClient.room.findFirst({
+      where: { slug },
+    });
+
+    if (!room) {
+      return res.status(404).json({
+        message: "Room not found",
+        slug,
+      });
+    }
+
+    return res.json({ room });
+  } catch (err) {
+    console.error("ROOM FETCH ERROR:", err);
+
+    return res.status(500).json({
+      message: "Failed to fetch room",
+    });
+  }
+});
+
 app.get("/chats/:roomId",async (req,res)=>{
-    const roomId= Number(req.params.roomId);
+    try{
+        const roomId= Number(req.params.roomId);
     const messages=await prismaClient.chat.findMany({
         where:{
             roomId:roomId
@@ -111,11 +147,20 @@ app.get("/chats/:roomId",async (req,res)=>{
             id:"desc"
         },
         take:50
-    });
+    })
     res.json({
         messages
     })
-})
+    }
+    catch(err:any)
+    {
+        res.json({
+            message:err.message
+        })
+    }
+    
+});
+
 app.listen(3001,()=>{
 console.log("3001 running")
 });

@@ -8,29 +8,29 @@ datasource db {
 }
 
 model User {
-  id    String @id @default(uuid())
-  email String @unique
+  id       String  @id @default(uuid())
+  email    String  @unique
   password String
-  name String
-  photo String?
-  rooms Room[]  //a single user can create multiple rooms
-  chats Chat[]  //a user can have multiple chats
+  name     String
+  photo    String?
+  chats    Chat[]
+  rooms    Room[]
 }
 
-model Room{
-  id Int @id @default(autoincrement())
-  slug String  @unique//short name for room
+model Room {
+  id       Int      @id @default(autoincrement())
+  slug     String   @unique
   createAt DateTime @default(now())
-  adminId String
-  admin User @relation(fields: [adminId],references: [id])  //but a room have a single user only
-  chats Chat[]  //room can have many chats
+  adminId  String
+  chats    Chat[]
+  admin    User     @relation(fields: [adminId], references: [id])
 }
 
-model Chat{
-  id Int @id @default(autoincrement())
-  roomId Int
+model Chat {
+  id      Int    @id @default(autoincrement())
+  roomId  Int
   message String
-  userId String
-  room Room @relation(fields: [roomId],references: [id])  //but a chat belongs to a particular room only
-  user User @relation(fields: [userId],references: [id])  //a chat belongs to a particluar user only
+  userId  String
+  room    Room   @relation(fields: [roomId], references: [id])
+  user    User   @relation(fields: [userId], references: [id])
 }
