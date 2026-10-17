@@ -10,8 +10,16 @@ export function useSocket() {
 
     useEffect(() => {
         let disposed = false;
-        const ws = new WebSocket(`${WS_URL}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZTYwYjQ5NS0zNGYyLTRhN2MtODQ0MC03Nzg3MDhhMWE1NzAiLCJpYXQiOjE3OTIyMTk1NTF9.ZQnZgXevZg1G_L6iyLWr8IlCYV0vr4eMbfvCGRmpOK4`);
+        const token = localStorage.getItem("token");
 
+        if (!token) {
+            window.location.href = "/signin";
+            return;
+        }
+
+        const ws = new WebSocket(
+            `${WS_URL}?token=${encodeURIComponent(token)}`
+        );
         ws.onopen = () => {
             if (disposed) {
                 ws.close();

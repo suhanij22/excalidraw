@@ -1,19 +1,47 @@
 
 'use client';
 
-import { useState, useEffect } from 'react';
-import { PenTool, Menu, X } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { PenTool, Menu, X, UserCircle, ChevronDown, LogOut, LayoutDashboard } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
-    const Router= useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', onScroll);
-    return () => window.removeEventListener('scroll', onScroll);
+    setIsLoggedIn(!!localStorage.getItem('token'));
+
+    // Close profile menu when clicking outside
+    const onClickOutside = (event: MouseEvent) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+
+    // Update login state if another tab changes localStorage
+    const onStorage = () => {
+      setIsLoggedIn(!!localStorage.getItem('token'));
+    };
+
+    document.addEventListener('mousedown', onClickOutside);
+    window.addEventListener('storage', onStorage);
+
+    return () => {
+      window.removeEventListener('scroll', onScroll);
+      document.removeEventListener('mousedown', onClickOutside);
+      window.removeEventListener('storage', onStorage);
+    };
   }, []);
 
   const navLinks = [
@@ -22,6 +50,77 @@ export default function Navbar() {
     { label: 'Shortcuts', href: '#shortcuts' },
     { label: 'Community', href: '#community' },
   ];
+
+  function logout() {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    setProfileOpen(false);
+    setMobileOpen(false);
+    router.push('/');
+    router.refresh();
+  }
+
+  function goToDashboard() {
+    setProfileOpen(false);
+    setMobileOpen(false);
+    router.push('/dashboard');
+  }
+
+  function renderAuthButtons() {
+    if (isLoggedIn) {
+      return (
+        <div className="relative" ref={profileRef}>
+          <button
+            onClick={() => setProfileOpen(!profileOpen)}
+            aria-label="Profile menu"
+            aria-expanded={profileOpen}
+            className="flex items-center gap-2 rounded-full border border-ink/15 p-1.5 text-ink hover:bg-ink/5 transition-colors"
+          >
+            <UserCircle className="h-7 w-7" />
+            <ChevronDown className="h-4 w-4" />
+          </button>
+
+          {profileOpen && (
+            <div className="absolute right-0 top-full z-50 mt-3 w-48 rounded-xl border border-ink/10 bg-paper p-2 shadow-xl">
+              <button
+                onClick={goToDashboard}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-ink hover:bg-ink/5"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                Dashboard
+              </button>
+
+              <button
+                onClick={logout}
+                className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <div className="flex items-center gap-3">
+        <Link
+          href="/signin"
+          className="px-4 py-2 text-sm font-semibold text-ink hover:text-accent-orange transition-colors"
+        >
+          Sign in
+        </Link>
+
+        <Link
+          href="/signup"
+          className="rounded-lg bg-ink px-5 py-2.5 text-sm font-semibold text-paper hover:bg-ink-light transition-all hover:shadow-lg hover:-translate-y-0.5"
+        >
+          Sign up
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <header
@@ -33,14 +132,14 @@ export default function Navbar() {
     >
       <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Logo */}
-        <a href="/" className="flex items-center gap-2.5 group">
+        <Link href="/" className="flex items-center gap-2.5 group">
           <div className="w-9 h-9 rounded-lg bg-ink flex items-center justify-center transition-transform group-hover:rotate-6">
             <PenTool className="w-5 h-5 text-paper" strokeWidth={2.5} />
           </div>
           <span className="font-hand text-2xl font-bold text-ink">
             Sketchwai
           </span>
-        </a>
+        </Link>
 
         {/* Desktop navigation */}
         <div className="hidden md:flex items-center gap-8">
@@ -56,24 +155,10 @@ export default function Navbar() {
           ))}
         </div>
 
-        {/* Desktop authentication buttons */}
+        {/* Desktop authentication */}
         <div className="hidden md:flex items-center gap-3">
-         <Link href={"/signin"}><button
-            className="px-4 py-2 text-sm font-semibold text-ink hover:text-accent-orange transition-colors"
-          >
-            Sign in
-          </button>
-        </Link> 
-        <Link href={"/signup"}>
-          <button
-            className="px-5 py-2.5 text-sm font-semibold text-paper bg-ink rounded-lg hover:bg-ink-light transition-all hover:shadow-lg hover:-translate-y-0.5"
-          >
-            Sign up
-          </button>
-          </Link>
+          {renderAuthButtons()}
         </div>
-
-        
 
         {/* Mobile menu button */}
         <button
@@ -105,21 +190,43 @@ export default function Navbar() {
           ))}
 
           <div className="flex flex-col gap-2 pt-2 border-t border-ink/10">
-            <a
-              href="/signin"
-              onClick={() => setMobileOpen(false)}
-              className="block w-full text-center px-5 py-2.5 text-sm font-semibold text-ink border border-ink/15 rounded-lg hover:bg-ink/5"
-            >
-              Sign in
-            </a>
+            {isLoggedIn ? (
+              <>
+                <button
+                  onClick={goToDashboard}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-ink hover:bg-ink/5"
+                >
+                  <LayoutDashboard className="h-4 w-4" />
+                  Dashboard
+                </button>
 
-            <a
-              href="/signup"
-              onClick={() => setMobileOpen(false)}
-              className="block w-full text-center px-5 py-2.5 text-sm font-semibold text-paper bg-ink rounded-lg hover:bg-ink-light"
-            >
-              Sign up
-            </a>
+                <button
+                  onClick={logout}
+                  className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-red-600 hover:bg-red-50"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/signin"
+                  onClick={() => setMobileOpen(false)}
+                  className="block w-full text-center px-5 py-2.5 text-sm font-semibold text-ink border border-ink/15 rounded-lg hover:bg-ink/5"
+                >
+                  Sign in
+                </Link>
+
+                <Link
+                  href="/signup"
+                  onClick={() => setMobileOpen(false)}
+                  className="block w-full text-center px-5 py-2.5 text-sm font-semibold text-paper bg-ink rounded-lg hover:bg-ink-light"
+                >
+                  Sign up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}

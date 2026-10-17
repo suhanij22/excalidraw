@@ -141,6 +141,38 @@ app.get("/room/:slug", async (req, res) => {
   }
 });
 
+
+app.get("/room/id/:id", async (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isSafeInteger(id) || id <= 0) {
+        return res.status(400).json({
+            message: "Invalid room ID",
+        });
+    }
+
+    try {
+        const room = await prismaClient.room.findUnique({
+            where: { id },
+        });
+
+        if (!room) {
+            return res.status(404).json({
+                message: "Room not found",
+            });
+        }
+
+        return res.json({ room });
+    } catch (error) {
+        console.error("ROOM ID LOOKUP ERROR:", error);
+
+        return res.status(500).json({
+            message: "Failed to fetch room",
+        });
+    }
+});
+
+
 app.get("/chats/:roomId", async (req, res) => {
   const roomId = Number(req.params.roomId);
 

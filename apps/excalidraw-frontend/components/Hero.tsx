@@ -31,7 +31,7 @@ export default function Hero() {
 
           <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center lg:justify-start animate-fade-up delay-300 opacity-init">
             <a
-              href="#"
+              href="/dashboard"
               className="inline-flex items-center justify-center gap-2 px-7 py-3.5 text-base font-semibold text-paper bg-ink rounded-xl hover:bg-ink-light transition-all hover:shadow-xl hover:-translate-y-0.5"
             >
               Start drawing
