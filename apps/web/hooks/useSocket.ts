@@ -10,9 +10,7 @@ export function useSocket() {
 
     useEffect(() => {
         let disposed = false;
-        const ws = new WebSocket(`${WS_URL}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZTYwYjQ5NS0zNGYyLTRhN2MtODQ0MC03Nzg3MDhhMWE1NzAiLCJpYXQiOjE3OTIxNDU4NzV9.CA5pbfZZKsYlMcDA-45iIaO4K9vkIi__5X4FsHf1D3c
-
-`);
+        const ws = new WebSocket(`${WS_URL}?token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2ZTYwYjQ5NS0zNGYyLTRhN2MtODQ0MC03Nzg3MDhhMWE1NzAiLCJpYXQiOjE3OTIyMTk1NTF9.ZQnZgXevZg1G_L6iyLWr8IlCYV0vr4eMbfvCGRmpOK4`);
 
         ws.onopen = () => {
             if (disposed) {

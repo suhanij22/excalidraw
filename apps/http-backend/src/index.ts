@@ -4,9 +4,14 @@ import { JWT_SECRET } from "@repo/backend-common/config";
 import { middleware } from "./middleware";
 import {CreateUserSchema,SigninSchema,CreateRoomSchema} from "@repo/common/types";
 import { prismaClient } from "@repo/db/client";
+import cors from "cors";
 
 const app=express();
 app.use(express.json());
+
+app.use(cors({
+  origin: "http://localhost:3000",
+}));
 
 app.post("/signup",async (req,res)=>{
     const parsedData=CreateUserSchema.safeParse(req.body);
@@ -136,29 +141,30 @@ app.get("/room/:slug", async (req, res) => {
   }
 });
 
-app.get("/chats/:roomId",async (req,res)=>{
-    try{
-        const roomId= Number(req.params.roomId);
-    const messages=await prismaClient.chat.findMany({
-        where:{
-            roomId:roomId
-        },
-        orderBy:{
-            id:"desc"
-        },
-        take:50
-    })
-    res.json({
-        messages
-    })
-    }
-    catch(err:any)
-    {
-        res.json({
-            message:err.message
-        })
-    }
-    
+app.get("/chats/:roomId", async (req, res) => {
+  const roomId = Number(req.params.roomId);
+
+  if (!Number.isInteger(roomId) || roomId <= 0) {
+    return res.status(400).json({
+      message: "Invalid room ID",
+    });
+  }
+
+  try {
+    const messages = await prismaClient.chat.findMany({
+      where: { roomId },
+      orderBy: { id: "desc" },
+      take: 50,
+    });
+
+    return res.json({ messages });
+  } catch (err) {
+    console.error("FETCH CHATS ERROR:", err);
+
+    return res.status(500).json({
+      message: "Failed to fetch chats",
+    });
+  }
 });
 
 app.listen(3001,()=>{
